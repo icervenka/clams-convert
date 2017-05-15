@@ -1,0 +1,1 @@
+clams_generate_file
