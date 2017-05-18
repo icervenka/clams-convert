@@ -7,7 +7,7 @@ import datetime
 file_list = []
 data_frame_final = pd.DataFrame()
 
-for file in glob.glob("animal_data/*.CSV"):
+for file in glob.glob("jorge/*.CSV"):
     file_list.append(file)
 
 if len(file_list) == 0:
