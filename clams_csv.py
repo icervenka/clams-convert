@@ -121,16 +121,17 @@ for csv in file_list:
     # parse events from csv file
     event_records = np.array(records[events_line:])
     
-    # select Intervals and Description for data frame
-    events = pd.DataFrame(event_records[:,[0,3]])
-    events.columns = ["Interval", "Event Log"] # rename
-    
-    # convert intervals to numeric and set as index for merging to data dataframe
-    events.Interval = events.Interval.apply(pd.to_numeric)
-    events = events.set_index("Interval")
-    
-    # merge events to data dataframe keeping intervals without description as an empty string
-    data.iloc[list(events.index), [-1]] = events["Event Log"]
+    if len(event_records) > 0:
+        # select Intervals and Description for data frame
+        events = pd.DataFrame(event_records[:,[0,3]])
+        events.columns = ["Interval", "Event Log"] # rename
+        
+        # convert intervals to numeric and set as index for merging to data dataframe
+        events.Interval = events.Interval.apply(pd.to_numeric)
+        events = events.set_index("Interval")
+        
+        # merge events to data dataframe keeping intervals without description as an empty string
+        data.iloc[list(events.index), [-1]] = events["Event Log"]
 
     #TODO set float precision
     
@@ -144,7 +145,7 @@ print("Processing complete")
 
 # export the final data frame
 filename = str(datetime.date.today())+"_result_all.csv"
-with open(str(output_filepath)+filename, "w") as file:
+with open(str(output_filepath)+"/"+filename, "w") as file:
     data_frame_final.to_csv(file, index = False)
   
 print("\n")
