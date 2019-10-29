@@ -1,23 +1,21 @@
-display_app	name_app	name_tse	name_classic	type_py	type_R
-Subject	subject	Animal No.	CHAN	string	character
-Interval	interval	NA	INTERVAL	int	numeric
-Date-Time	date-time	NA	DATE/TIME	string	character
-NA	NA	Date	NA	string	character
-NA	NA	Time	NA	string	character
-Temperature	temp	TempC	TEMP AMB	float	double
-Light	light	LightC	ROOM LIGHT	int	numeric
-VO2	vo2	VO2(1)	VO2	float	double
-VCO2	vco2	VCO2(1)	VCO2	float	double
-RER	rer	RER	RER	float	double
-Heat	heat	H(1)	HEAT	float	double
-XY Total Movement	xyt	XT+YT	NA	int	numeric
-X Total Movement	xt	XT	XTOT	int	numeric
-X Ambulatory Movement	xa	XA	XAMB	int	numeric
-X F Movement	xf	XF	NA	int	numeric
-Y Total Movement	yt	YT	YTOT	int	numeric
-Y Ambulatory Movement	ya	YA	YAMB	int	numeric
-Y F Movement	yf	YF	NA	int	numeric
-Z Movement	z	Z	ZTOT	int	numeric
-Drink	drink	Drink	DRINK1	float	double
-Feed	feed	Feed	FEED1	float	double
-Events	events	NA	NA	string	character
+display_app	name_app	name_tse	name_classic	type_py	type_R	aggregate	group_calc
+Subject	subject	Animal No.	CHAN	string	character	None	0
+Interval	interval	NA	INTERVAL	int	numeric	None	0
+Date-Time	date_time	NA	DATE/TIME	string	character	None	0
+NA	NA	Date	NA	string	character	None	0
+NA	NA	Time	NA	string	character	None	0
+Light	light	LightC	ROOM LIGHT	int	numeric	None	0
+VO2	vo2	VO2(1)	VO2	float	double	mean	1
+VCO2	vco2	VCO2(1)	VCO2	float	double	mean	1
+RER	rer	RER	RER	float	double	mean	1
+Heat	heat	H(1)	HEAT	float	double	mean	1
+XY Total Movement	xyt	XT+YT	NA	int	numeric	sum	1
+X Total Movement	xt	XT	XTOT	int	numeric	sum	1
+X Ambulatory Movement	xa	XA	XAMB	int	numeric	sum	1
+X F Movement	xf	XF	NA	int	numeric	sum	1
+Y Total Movement	yt	YT	YTOT	int	numeric	sum	1
+Y Ambulatory Movement	ya	YA	YAMB	int	numeric	sum	1
+Y F Movement	yf	YF	NA	int	numeric	sum	1
+Z Movement	z	Z	ZTOT	int	numeric	sum	1
+Drink	drink	Drink	DRINK1	float	double	mean	1
+Feed	feed	Feed	FEED1	float	double	mean	1
