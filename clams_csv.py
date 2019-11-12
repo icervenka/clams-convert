@@ -45,9 +45,9 @@ def parse_classic(csv, column_specs):
                 subject_id = line
             if re.match(clams_const.patterns_classic['data_start'], line):
                 start_data_line = i+clams_const.patterns_classic['start_offset']
-#            if re.match(clams_const.patterns_classic['events'], line):
-#                events_line = i+clams_const.patterns_classic['events_offset']
-#                end_data_line = i-1
+            if re.match(clams_const.patterns_classic['events'], line):
+                events_line = i+clams_const.patterns_classic['events_offset']
+                end_data_line = i-1
 
     # skip if csv file is a parameter file not an animal file
     if file_type == False:
