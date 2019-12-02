@@ -1,21 +1,21 @@
-display_app	name_app	name_tse	name_classic	type_py	type_R	aggregate	group_calc
-Subject	subject	Animal No.	CHAN	string	character	None	0
-Interval	interval	NA	INTERVAL	int	numeric	None	0
-Date-Time	date_time	NA	DATE/TIME	string	character	None	0
-NA	NA	Date	NA	string	character	None	0
-NA	NA	Time	NA	string	character	None	0
-Light	light	LightC	ROOM LIGHT	int	numeric	None	0
-VO2	vo2	VO2(1)	VO2	float	double	mean	1
-VCO2	vco2	VCO2(1)	VCO2	float	double	mean	1
-RER	rer	RER	RER	float	double	mean	1
-Heat	heat	H(1)	HEAT	float	double	mean	1
-XY Total Movement	xyt	XT+YT	NA	int	numeric	sum	1
-X Total Movement	xt	XT	XTOT	int	numeric	sum	1
-X Ambulatory Movement	xa	XA	XAMB	int	numeric	sum	1
-X F Movement	xf	XF	NA	int	numeric	sum	1
-Y Total Movement	yt	YT	YTOT	int	numeric	sum	1
-Y Ambulatory Movement	ya	YA	YAMB	int	numeric	sum	1
-Y F Movement	yf	YF	NA	int	numeric	sum	1
-Z Movement	z	Z	ZTOT	int	numeric	sum	1
-Drink	drink	Drink	DRINK1	float	double	mean	1
-Feed	feed	Feed	FEED1	float	double	mean	1
+display_app	name_app	name_tse	name_classic	type_py	type_R	aggregate	vis_unit
+Subject	subject	Animal No.	CHAN	string	character	None	None
+Interval	interval	NA	INTERVAL	int	numeric	None	None
+Date-Time	date_time	NA	DATE/TIME	string	character	None	None
+NA	NA	Date	NA	string	character	None	None
+NA	NA	Time	NA	string	character	None	None
+Light	light	LightC	ROOM LIGHT	int	numeric	None	None
+VO2	vo2	VO2(1)	VO2	float	double	mean	[ml/h/kg]
+VCO2	vco2	VCO2(1)	VCO2	float	double	mean	[ml/h/kg]
+RER	rer	RER	RER	float	double	mean	[]
+Heat	heat	H(1)	HEAT	float	double	mean	[kcal/h/kg]
+XY Total Movement	xyt	XT+YT	NA	int	numeric	sum	[counts]
+X Total Movement	xt	XT	XTOT	int	numeric	sum	[counts]
+X Ambulatory Movement	xa	XA	XAMB	int	numeric	sum	[counts]
+X F Movement	xf	XF	NA	int	numeric	sum	[counts]
+Y Total Movement	yt	YT	YTOT	int	numeric	sum	[counts]
+Y Ambulatory Movement	ya	YA	YAMB	int	numeric	sum	[counts]
+Y F Movement	yf	YF	NA	int	numeric	sum	[counts]
+Z Movement	z	Z	ZTOT	int	numeric	sum	[counts]
+Drink	drink	Drink	DRINK1	float	double	mean	[ml]
+Feed	feed	Feed	FEED1	float	double	mean	[g]

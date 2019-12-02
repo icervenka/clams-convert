@@ -10,6 +10,7 @@ import re
 
 # columns specification file
 column_specs_file = "clams_column_specification.txt"
+output_time_format = "%Y-%m-%d %H:%M:%S"
 
 # RE patterns to identify lines of interest in csv data
 patterns_classic = {
