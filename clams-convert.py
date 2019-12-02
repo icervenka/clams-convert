@@ -16,7 +16,7 @@ import argparse
 import os
 
 # import various CLAMS system specific constants and variables
-import clams_const
+import imports.clams_const as clams_const
 
 def parse_classic(csv, column_specs):
     col_mapper = column_specs.set_index('name_classic').loc[:, 'name_app'].dropna().to_dict()
