@@ -1,0 +1,3 @@
+display	app	unit	type	aggregate	colnames
+Date-Time	date_time	NULL	NULL	NULL	NULL
+distance	distance	[m]	float	mean	NULL

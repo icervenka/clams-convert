@@ -1,0 +1,20 @@
+display	app	unit	type	aggregate	colnames
+Subject	subject	NULL	NULL	NULL	NULL
+NULL	NULL	NULL	NULL	NULL	CHAN
+Interval	interval	NULL	int	NULL	INTERVAL
+Date-Time	date_time	NULL	str	NULL	DATE/TIME
+Light	light	NULL	str	NULL	ROOM LIGHT
+VO2	vo2	[ml/h/kg]	float	mean	VO2
+VCO2	vco2	[ml/h/kg]	float	mean	VCO2
+RER	rer	[]	float	mean	RER
+Heat	heat	[kcal/h/kg]	float	mean	HEAT
+XY Total Movement	xyt	[counts]	NULL	sum	NA
+X Total Movement	xt	[counts]	int	sum	XTOT
+X Ambulatory Movement	xa	[counts]	int	sum	XAMB
+X F Movement	xf	[counts]	NULL	sum	NULL
+Y Total Movement	yt	[counts]	int	sum	YTOT
+Y Ambulatory Movement	ya	[counts]	int	sum	YAMB
+Y F Movement	yf	[counts]	NULL	sum	NULL
+Z Movement	z	[counts]	int	sum	ZTOT
+Drink	drink	[ml]	float	sum	DRINK1
+Feed	feed	[g]	float	sum	FEED1
