@@ -1,7 +1,4 @@
 .gitgnore
 test_data/
-test_classic/
-test_tse/
 .DS_Store
-.idea/
 __pycache__/
