@@ -85,3 +85,38 @@ class FileParser:
                 raise e.HeaderNotUniqueError("Column names in data file are not unique.")
         else:
             return header
+    def read_data(self, text):
+        header = text[self.line_numbers['data_start'] + self.offsets['header_start']]
+        header = header.split(self.split_char)
+
+        df_start = self.line_numbers['data_start'] + self.offsets['data_start']
+        df_end = max(len(text), self.line_numbers['data_end'] + self.offsets['data_end'])
+
+        records = text[df_start:df_end]
+        split_records = [x.split(self.split_char) for x in records]
+        data = pd.DataFrame(np.array(split_records))
+        data = data.iloc[:, 0:len(header)]
+        data.columns = self.make_header_unique(header)
+        return data
+
+    def format_ts(self, ts):
+        ts = ts.str.strip()
+        ts = pd.to_datetime(ts, format=self.time_fmt_in)
+        ts = ts.dt.strftime(self.time_fmt_out)
+        ts.name = "date_time"
+        return ts
+
+    def parse(self, file):
+        # TODO there is an error in clams-tse due to utf failing to read degree sign
+        with open(file, "r") as current_file:
+            text = self.parse_text(current_file)
+            try:
+                self.init_line_numbers(text)
+                subjects = self.parse_subject_names(text)
+                data = self.read_data(text)
+                data = self.prettify(data, subjects)
+            except (e.FileFormatError, e.SubjectIdError) as err:
+                print(file, " - ", err, "Skipping")
+                raise
+            else:
+                return data
