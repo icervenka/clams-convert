@@ -55,3 +55,33 @@ class FileParser:
                 self.__dict__[k].update(v)
             except AttributeError:
                 print("Trying to modify non-existent property in FileParser.")
+
+
+    def init_line_numbers(self, text):
+        self.is_set_patterns()
+        for k, v in self.patterns.items():
+            self.line_numbers[k] = self.search_pattern(v, text)
+        self.validate_line_numbers()
+        return self
+
+    def is_set_patterns(self):
+        for k, v in self.patterns.items():
+            if v is None:
+                raise e.FileFormatError("Set re for " + str(k) + " is required for a custom parser.")
+
+    def validate_line_numbers(self):
+        for k, v in self.line_numbers.items():
+            if v is None:
+                raise e.FileFormatError("Format not recognized, required pattern "
+                                        + "'{}' for {} is missing. ".format(self.patterns[k].pattern, k))
+        return self
+
+    def make_header_unique(self, header):
+        if len(set(header)) != len(header):
+            if self.repair_header == True:
+                # adds unique prefixes to header in case the column names are the same
+                return ["X" + str(x) for x in range(len(header))]
+            else:
+                raise e.HeaderNotUniqueError("Column names in data file are not unique.")
+        else:
+            return header
