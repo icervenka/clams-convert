@@ -1,3 +1,32 @@
+import re
+import pandas as pd
+import numpy as np
+from abc import abstractmethod
+from . import errors as e
+
+def check_subject_names(names):
+    import string
+    letters = iter(string.ascii_letters)
+    seen = set()
+    renamed = []
+    for n in names:
+        while n in seen:
+            append = next(letters)
+            print("Renaming duplicate subjects: {} -> {}".format(n, n+append))
+            n = n + append
+        seen.add(n)
+        renamed.append(n)
+    return renamed
+
+def convert_values(df, conversion_factor, columns="all"):
+    if isinstance(df, pd.Series):
+        df = df * conversion_factor
+    else:
+        if columns == "all":
+            columns = df.columns
+        df = df.loc[:, columns].apply(lambda x: x * conversion_factor, axis=1)
+    return df
+
 class FileParser:
 
     def __init__(self, time_fmt_in, mapper=None, repair_header=True):
@@ -120,3 +149,6 @@ class FileParser:
                 raise
             else:
                 return data
+
+    def __str__(self):
+        print(vars(self))
