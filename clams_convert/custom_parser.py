@@ -168,3 +168,54 @@ class ClamsTseParser(FileParser):
         data = data[self.mapper.specs.app.dropna()]
 
         return data
+
+class FwrZierathOldParser(FileParser):
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        patterns = {
+            "file_type": re.compile('Turns Data'),
+            "subject": re.compile('Turns Data'),
+            "data_start": re.compile('Turns Data')
+        }
+        offsets = {
+            "data_start": 1
+        }
+        # format_description = {
+        #     "multifile": False,
+        #     "multiparameter": False
+        # }
+        # self.update_info(**dict(patterns=patterns, offsets=offsets, format_description=format_description))
+        self.update_info(**dict(patterns=patterns, offsets=offsets))
+
+        self.turns_conversion_factor = 0.6912
+
+    def parse_subject_names(self, text):
+        subject_ids = text[self.line_numbers['subject']]
+        subject_ids = subject_ids.split(',')
+        subject_ids = filter(lambda x: self.patterns['subject'].pattern in x, subject_ids)
+        subject_ids = [x.split(' ')[0] for x in subject_ids]
+        return subject_ids
+
+    def prettify(self, data, subjects, *args):
+        df_list = []
+        for subject in subjects:
+            data_sub = data.filter(regex=subject, axis=1)
+            date = data_sub.filter(regex='Turns Date').iloc[:, 0]
+            time = data_sub.filter(regex='Turns Time').iloc[:, 0]
+            turns = data_sub.filter(regex='Turns Data').iloc[:, 0]
+            turns.name = 'distance'
+            turns = turns.astype(float)
+            turns = convert_values(turns, self.turns_conversion_factor)
+            date_time = date + " " + time
+            date_time = self.format_ts(date_time)
+            data_subject_concat = pd.concat([pd.Series([subject]*len(date_time), name='subject'),
+                                             date_time,
+                                             pd.Series(range(len(date_time)), name='interval'),
+                                             turns],
+                                            axis=1)
+            # data_subject_concat.columns = ["subject", "date_time", "interval", "distance"]
+            df_list.append(data_subject_concat)
+
+        df = pd.concat(df_list, axis=0)
+        return df
