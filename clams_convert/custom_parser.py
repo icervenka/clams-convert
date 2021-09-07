@@ -260,3 +260,110 @@ class FwrZierathParser(FileParser):
         df = df[["subject", "date_time", "interval", "distance"]]
 
         return df
+
+class FwrCanlonParser(FileParser):
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.wheel_type = "canlon"
+        self.start_data = start_date
+
+        if (not is_date_8(start_date)):
+            while (not is_date_8(inp)):
+                inp = input("Date when experiment started (yyyymmdd): ")
+                inp = "20170908"
+
+        self.init_time = datetime.strptime(inp, "%Y%m%d")
+        self.split_char = '\t'
+        self.turns_conversion_factor = 0.6912
+        self.wide_format = 0
+
+        self.patterns = {
+            "file_type": None,
+            "subject": None,
+            "data_start": None,
+            "data_end": None
+        }
+        self.offsets = {
+            "data_start": 0
+        }
+
+    def parse_subject_names(self, text):
+        subject = os.path.splitext(os.path.basename(file))[0]
+        return subject
+
+    def parse_data(self, file):
+        #        files = self.load_files(directory)
+        #        subject = ""
+        #
+        #        for f in files:
+        #            with open(f, "r") as current_file:
+        #                text = self.parse_text(current_file)
+        #                self.init_line_numbers(text)
+        #                subject = self.parse_subject_names(f)
+        #                self.subjects.append(subject)
+        #                records = self.parse_records(text, self.start_line, self.end_line)
+        #                data = self.records_to_df(records, self.split_char)
+        #                data[self.subject_string] = subject
+        #
+        #                yield(data)
+        pass
+
+    def prettify(self, data, *args):
+        data = data.iloc[:, (3, 0, 1)]
+
+        data.columns = [self.subject_string, self.datetime_string, self.distance_string]
+
+        data.date_time = data.date_time.astype(int)
+        interval = data.date_time[1] - data.date_time[0]
+
+        data.Distance = data.Distance * interval
+        data = data[data.Distance != 'NaN']
+        data = data[data.Distance != '']
+
+        data.Date = data.Date.apply(lambda x: self.init_time + timedelta(minutes=x))
+        data.Distance = data.Distance.astype(int)
+        data.reset_index(inplace=True, drop=True)
+        return data
+
+
+class FwrWesterbladParser(FileParser):
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.wheel_type = "westerblad"
+        self.patterns['start_time'] = 'Start Time'
+        self.patterns['end_time'] = 'End Time'
+        self.patterns['wheels'] = 'Wheels'
+        self.patterns['bin_size'] = 'Bin Size'
+        self.patterns['activity_units'] = 'Activity Units'
+        self.patterns['bin'] = 'Bin'
+        self.split_char = "\t"
+        self.start_line_pattern = 'bin'
+        self.turns_conversion_factor = 1000
+
+        self.patterns = {
+            "file_type": None,
+            "subject": None,
+            "data_start": None,
+            "data_end": None
+        }
+        self.offsets = {
+            "data_start": 0
+        }
+
+    def parse_subject_names(self, text):
+        subjects = text[self.line_numbers['bin']].split(self.split_char)[1:]
+        subjects = ["s" + x.split(' ')[2] for x in subjects]
+        return subjects
+
+    def parse_data(self, file):
+        pass
+
+    def prettify(self, data, *args):
+        subjects = subjects[0]
+        data.columns = [self.datetime_string] + subjects
+
+        for column in data.iloc[:, 1:]:
+            data[column] = data[column].str.replace(",", ".").astype(float)
+        return data
