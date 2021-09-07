@@ -219,3 +219,44 @@ class FwrZierathOldParser(FileParser):
 
         df = pd.concat(df_list, axis=0)
         return df
+
+class FwrZierathParser(FileParser):
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        patterns = {
+            "file_type": "Channel Name",
+            "subject": "Channel Group",
+            "data_start": "Sensor Type",
+        }
+        offsets = {
+            "data_start": 1
+        }
+        # format_description = {
+        #     "multifile": False,
+        #     "multiparameter": False
+        # }
+        # self.update_info(**dict(patterns=patterns, offsets=offsets, format_description=format_description))
+        self.update_info(**dict(patterns=patterns, offsets=offsets))
+        self.turns_conversion_factor = 0.6912
+
+    def parse_subject_names(self, text):
+        subjects = ','.join(text[self.line_numbers['subject']:self.line_numbers['data_start']]).split(',')[1:]
+        subjects = [re.sub(" ", "_", x) for x in subjects]
+        return subjects
+
+    def prettify(self, data, subjects, *args):
+        subjects = check_subject_names(subjects)
+        date_time = data.iloc[:, 0]
+        date_time = self.format_ts(date_time)
+
+        turns_only = data.iloc[:, 1:len(subjects) + 1]
+        turns_only.columns = subjects
+        turns_only = turns_only.astype(float)
+        turns_only = FileParser.convert_values(turns_only, self.turns_conversion_factor)
+
+        df = pd.concat([date_time, pd.Series(range(len(date_time)), name='interval'), turns_only], axis=1)
+        df = df.melt(id_vars=["date_time", "interval"], var_name="subject", value_name="distance")
+        df = df[["subject", "date_time", "interval", "distance"]]
+
+        return df
