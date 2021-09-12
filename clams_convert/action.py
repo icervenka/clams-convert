@@ -42,3 +42,35 @@ class Action:
     @abstractmethod
     def run(self, *args):
         pass
+
+    def validate_aggregation(self):
+        if self.cmd.get('frequency') != 0 and self.cmd.get('frequency') is not None:
+            datafile_frequences = [x.freq for x in self.datafiles]
+            if np.sum(np.remainder(self.cmd.get('frequency'), datafile_frequences)) != 0:
+                raise ValueError("Datafiles cannot be aggregated to specified frequency")
+
+    def add_datafile(self, source):
+        if isinstance(source, Datafile):
+            self.datafiles.append(source)
+        else:
+            self.datafiles.append(Datafile(source))
+        self.find_common_interval()
+        return self
+
+    def find_common_interval(self):
+        all_intervals_s = [x.freq for x in self.datafiles]
+        self.common_interval_freq = np.lcm.reduce(all_intervals_s)
+        self.logger.info("Common interval frequency identified in datafiles: {} s".format(self.common_interval_freq))
+        if self.common_interval_freq // 60 < 1:
+            info_string = "The common interval is lower than one minute, is it intentional?"
+            self.logger.warning(info_string)
+            # raise UserWarning(info_string)
+        return self
+
+    def order_datafiles(self, by):
+        self.datafiles = sorted(self.datafiles, key=operator.attrgetter(by))
+        return self
+
+    def regularize(self):
+        data = [x.regularize() for x in self.datafiles]
+        return data
