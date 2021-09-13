@@ -74,3 +74,35 @@ class Action:
     def regularize(self):
         data = [x.regularize() for x in self.datafiles]
         return data
+
+    def create_metadata(self, meta_dict):
+        metadata_info = dict(
+            filetype="analysis-vis",
+            orientation=self.cmd.get('orientation'),
+            multiparameter=str(self.parser.format_description['multiparameter']),
+        )
+        metadata_info.update(**meta_dict)
+        return pd.DataFrame(metadata_info.items())
+
+    def export(self, datafiles):
+        for x in datafiles:
+            filename = datetime.today().strftime('%Y%m%d') + "_" + \
+                       str(random.randint(100, 999)) + "_" + \
+                       type(self).__name__.lower() + ".csv"
+            with open(str(self.cmd.get('output')) + "/" + filename, "w", newline='') as file:
+                file.write(Action.metadata_anchor + "\n")
+                self.create_metadata(dict()).to_csv(file, mode="a", index=False, header=False)
+                file.write(Action.data_anchor + "\n")
+                x.reorient(self.cmd.get('orientation')).export(file)
+
+    @staticmethod
+    def join_datafiles(datafiles):
+        merged = pd.concat([x.data for x in datafiles], axis=0)
+        return Datafile(merged)
+
+    @staticmethod
+    def join_rows(df_list):
+        return pd.concat(df_list, axis=0)
+
+    def __str__(self):
+        print(vars(self))
