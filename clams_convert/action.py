@@ -106,3 +106,50 @@ class Action:
 
     def __str__(self):
         print(vars(self))
+
+
+class Convert(Action):
+
+    def __init__(self, parser, *args):
+        super().__init__(*args)
+        self.mapper = ColMapper(self.cmd.get('system'))
+        self.parser = parser(self.cmd.get('time_fmt_in'), self.mapper)
+
+    def validate(self):
+        self.validate_aggregation()
+        return self
+
+    # def run_one(self, *args):
+    #     try:
+    #         self.logger.info("Processing: " + self.files[0])
+    #         data = self.parser.parse(self.files[0])
+    #     except (e.FileFormatError, e.SubjectIdError, ValueError) as err:
+    #         raise err
+    #     return [Datafile(data)]
+    #
+    # def run_many(self, *args):
+    #     combined_data = []
+    #     for file in self.files:
+    #         try:
+    #             self.logger.info("Processing: " + file)
+    #             data = self.parser.parse(file)
+    #             combined_data.append(data)
+    #         except (e.FileFormatError, e.SubjectIdError, ValueError) as err:
+    #             raise err
+    #     if self.parser.format_description['multifile'] is True:
+    #         return [Datafile(pd.concat(combined_data, axis=0))]
+    #     else:
+    #         return [Datafile(x) for x in combined_data]
+
+    def run(self, *args):
+        print("\nConverting files...\n")
+        if isinstance(self.scanner, file_scanner.IndividualFileScanner):
+            datafile_list = self.run_one(*args)
+        else:
+            datafile_list = self.run_many(*args)
+        self.validate()
+        if self.cmd.get('regularize'):
+            datafile_list = [x.regularize() for x in datafile_list]
+        if self.cmd.get('frequency') != 0:
+            datafile_list = [x.aggregate(self.cmd.get('frequency'), how=dict(np.sum)) for x in datafile_list]
+        return datafile_list
