@@ -153,3 +153,36 @@ class Convert(Action):
         if self.cmd.get('frequency') != 0:
             datafile_list = [x.aggregate(self.cmd.get('frequency'), how=dict(np.sum)) for x in datafile_list]
         return datafile_list
+
+
+class Join(Action):
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.parser = AnalysisVisParser()
+
+    def validate(self):
+        self.validate_aggregation()
+        # current version support only joining file with the same frequency
+        if len(set([x.freq for x in self.datafiles])) != 1:
+            raise ValueError("Joining experiments with different frequency is not currently supported")
+        for f, s in zip(self.datafiles, self.datafiles[1:]):
+            if f.end_date > s.start_date:
+                raise ValueError("Times of datafiles to be arranged are overlapping")
+        return self
+
+    def run(self, *args):
+        print("\nJoining files...\n")
+        for file in self.files:
+            try:
+                self.logger.info("Processing: " + file)
+                self.add_datafile(file)
+            except (e.FileFormatError, e.SubjectIdError, ValueError) as err:
+                raise err
+        self.order_datafiles("start_date").validate()
+        regularized_datafiles = self.regularize()
+        merged_data = Datafile(pd.concat([x.data for x in regularized_datafiles], axis=0)).regularize()
+        if self.cmd.get('frequency') != 0:
+            merged_data = merged_data.aggregate(self.cmd.get('frequency'), how=dict(np.sum))
+        # merged_data = Datafile(pd.concat(self.regularize(), axis=0)).regularize()
+        return [merged_data]
