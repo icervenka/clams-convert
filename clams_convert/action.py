@@ -186,3 +186,58 @@ class Join(Action):
             merged_data = merged_data.aggregate(self.cmd.get('frequency'), how=dict(np.sum))
         # merged_data = Datafile(pd.concat(self.regularize(), axis=0)).regularize()
         return [merged_data]
+
+class Match(Action):
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.parser = AnalysisVisParser()
+        self.dark_start = self.cmd.get('dark_start')
+        self.dark_end = self.cmd.get('dark_end')
+
+    @staticmethod
+    def timedelta_from_str(str1, str2):
+        return datetime(str2) - datetime(str1)
+
+    def validate(self):
+        self.validate_aggregation()
+        # dark_durations = [self.timedelta_from_str(d.dark_end - d.dark_start) for d in self.datafiles]
+        # if (not set(dark_durations)) | len(set(dark_durations)) > 1:
+        #     raise ValueError("Durations of dark cycles for individual experiments differ.")
+        return self
+
+    def run(self, *args):
+        print("\nMatching files...\n")
+        letters = iter(string.ascii_letters)
+        for file in self.files:
+            try:
+                # TODO add original filename as suffix to subject name
+                self.logger.info("Processing: " + file)
+                add_letter = next(letters)
+                d = Datafile(file)
+                name_mapping = dict(zip(d.subjects, [x + add_letter for x in d.subjects]))
+                d = d.rename_subjects(name_mapping)
+                self.logger.info(str(file))
+                self.add_datafile(d)
+            except (e.FileFormatError, e.SubjectIdError, ValueError):
+                raise
+        self.validate()
+
+        if self.cmd.get('frequency') != 0:
+            agg_freq = self.cmd.get('frequency')
+        else:
+            agg_freq = self.common_interval_freq
+
+        matched_datafiles = []
+        for d in self.datafiles:
+            # takes dict as aggregation mapping
+            # TODO some datafiles can have start some end
+            d = d.regularize().remove_incomplete_cycle(self.cmd.get('dark_start'), self.cmd.get('dark_end'))
+            # TODO change to universal mapping
+            d = d.aggregate(str(agg_freq) + 's', dict(distance=np.sum))
+            matched_datafiles.append(d)
+
+        # TODO can also be dark_end
+        datafiles = [x.set_datetime_start(self.cmd.get('match_start'), self.cmd.get('dark_start')) for x in matched_datafiles]
+        merged_data = self.join_datafiles(datafiles).equalize_observations()
+        return [merged_data]
