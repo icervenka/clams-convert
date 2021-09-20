@@ -75,3 +75,33 @@ class Datafile:
             de = str_to_time(self.dark_end)
             # TODO this will not work
             self.data['light'] = pd.Series(np.where(ts >= ds and ts < de, 0, 1))
+
+    def init_phase_changes(self):
+        if self.data['light'].iloc[0] == 0:
+            next_phase = 1
+        elif self.data['light'].iloc[0] == 1:
+            next_phase = 0
+        else:
+            raise ValueError("Illegal value in the light column, only 0 and 1 are permitted.")
+        i1 = list(self.data['light']).index(next_phase)
+        i2 = list(self.data['light'].iloc[(i1+1):]).index(1-next_phase)
+        self.phase_change_indices = (i1, i2)
+        self.phase_change_dates = (self.data.date_time.iloc[i1],
+                                   self.data.date_time.iloc[i2])
+
+    def init_freq(self):
+        try:
+            interval_lengths = self.subject_interval_lengths()
+            subject_freq = self.find_freq(interval_lengths)
+            self.validate_freq(subject_freq)
+            self.freq = freq_to_seconds(list(set(subject_freq.values()))[0])
+        except ValueError:
+            print("Subject data not initialized.")
+
+
+    def init_allowed_agg_freq(self):
+        phase1_duration = self.phase_change_dates[1] - self.phase_change_dates[0]
+        phase2_duration = timedelta(hours=24) - phase1_duration
+        common_agg = find_common_divisors(phase1_duration.total_seconds(),
+                                          phase2_duration.total_seconds())
+        self.allowed_agg_freq = divisible(common_agg, self.freq)
