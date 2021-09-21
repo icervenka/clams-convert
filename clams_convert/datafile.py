@@ -105,3 +105,36 @@ class Datafile:
         common_agg = find_common_divisors(phase1_duration.total_seconds(),
                                           phase2_duration.total_seconds())
         self.allowed_agg_freq = divisible(common_agg, self.freq)
+
+
+
+    def find_freq(self, interval_lengths):
+        subject_freq = dict()
+        for k, v in interval_lengths.items():
+            if len(v) > 1 and not self.force_regularize:
+                raise ValueError("The time series for {} is not regular ".format(k) +
+                                 "and force regularization is turned off")
+            elif len(v) > 1 and self.force_regularize:
+                self.logger.info("Time series for subject {} is not regular. \n".format(k) +
+                                 "The following are present (interval:count)")
+                for value, count in v.most_common():
+                    self.logger.info("\t" + str(value) + ":" + str(count))
+                self.logger.info("Selected most common interval - {}\n".format(v.most_common(1)[0][0]))
+                subject_freq[k] = v.most_common(1)[0][0]
+                self.regular = False
+            else:
+                subject_freq[k] = v.most_common(1)[0][0]
+                self.regular = True
+        return subject_freq
+
+    def validate_freq(self, subject_freq):
+        try:
+            subject_freq_list = list(set(subject_freq.values()))
+            if len(subject_freq_list) > 1:
+                raise ValueError(
+                    "Subjects in the experiment have different time intervals " +
+                    "between measurements. Consider converting the subject " +
+                    "files individually and use 'match' utility to combine " +
+                    "them with common measurement frequency.")
+        except ValueError:
+            ("No measurement intervals detected in data file.")
