@@ -106,7 +106,40 @@ class Datafile:
                                           phase2_duration.total_seconds())
         self.allowed_agg_freq = divisible(common_agg, self.freq)
 
+    def get_parameters(self):
+        t = list(self.data.columns)
+        _ = [t.remove(x) for x in self.descriptors]
+        _ = [t.remove(x) for x in self.light_column]
+        return t
 
+    # Block of initialize and initialize-related functions
+    #
+
+    # TODO currently does not interfaced with class
+    # Intended mainly for commandline, find a way how to include in html-version
+    def rename_subjects(self, name_mapping):
+        if callable(name_mapping):
+            self.data_subjects = name_mapping(self.data_subjects)
+        elif isinstance(name_mapping, dict):
+            #TODO affects split_subject_data
+            for key, value in name_mapping.items():
+                new_subjects = self.data.subjects.str.replace('^' + key + "$", value)
+            # if inplace:
+            self.data.subjects = new_subjects
+        else:
+            raise TypeError("Name mapping has to be either function or dict.")
+        return self
+        # else:
+        #     return Datafile(self.data).rename_subjects(a, inplace=True)
+
+    def subject_interval_lengths(self):
+        interval_lengths = dict()
+        for subject, data in self.subject_split_data.items():
+            date_column = data.date_time #pd.to_datetime(data.date_time)
+            count_intervals = collections.Counter(date_column.diff())
+            count_intervals.pop(pd.NaT, None)
+            interval_lengths[subject] = count_intervals
+        return interval_lengths
 
     def find_freq(self, interval_lengths):
         subject_freq = dict()
