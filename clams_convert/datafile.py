@@ -171,3 +171,50 @@ class Datafile:
                     "them with common measurement frequency.")
         except ValueError:
             ("No measurement intervals detected in data file.")
+
+    # Block of regularize and regularize-related functions
+    #
+
+    def equalize_observations(self, remove_from_end = True):
+        o = min(self.num_observations.values())
+        if remove_from_end:
+            filtered_data = {k: s[0:o] for (k, s) in self.subject_split_data.items()}
+        else:
+            filtered_data = {k: s[(len(s)-o):len(s)] for (k, s) in self.subject_split_data.items()}
+        return Datafile(pd.concat(filtered_data.values(), axis=0))
+
+    def remove_incomplete_cycle(self, remove_from_end = True):
+        if self.first_phase_change == self.start_data:
+            return self
+        else:
+            filtered_data = {}
+            for k, s in self.subject_split_data.items():
+                tmp = s[s.date_time >= self.first_phase_change]
+                filtered_data[k] = tmp
+            return Datafile(pd.concat(filtered_data, axis=0)).equalize_observations(remove_from_end)
+
+    def regularize(self, inplace=False):
+        if not self.freq:
+            raise ValueError("Measurement frequency of dataset has not been set." +
+                " Please run 'validate' first.")
+        if not self.regular:
+            self.logger.info("Regularizing on frequency {}".format(self.freq))
+            results = dict()
+            for i, s in self.subject_split_data.items():
+                results[i] = dict()
+                for p in self.parameters:
+                    ts = create_parameter_ts(s, p)
+                    ts_reg = ts.sample(
+                        sampling_period=timedelta(seconds=self.freq),
+                        start=self.start_date,
+                        end=self.end_date,
+                        interpolate='linear',
+                    )
+                    results[i][p] = ts_reg
+            if inplace:
+                self.data = traces_to_pandas(results).__initialize()
+                return self
+            else:
+                return Datafile(traces_to_pandas(results))
+        else:
+            return self
