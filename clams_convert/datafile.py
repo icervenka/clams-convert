@@ -218,3 +218,23 @@ class Datafile:
                 return Datafile(traces_to_pandas(results))
         else:
             return self
+
+    # TODO
+    # use different functions for different parameters - add aggregator to col_mapper
+    # light aggregated min, max or maybe median - should not matter if phases are preserved
+    # does not center on phase change
+    def aggregate(self, new_freq, how):
+        if new_freq not in self.allowed_agg_freq:
+            raise e.AggregationFrequencyError("Illegal frequency, only frequencies" +
+                                            "divisible that don't disrupt phase" +
+                                            "changes are allowed.")
+        aggregated_data = {}
+        for k, s in self.subject_split_data.items():
+            self.logger.info("Aggregating on frequency {}".format(new_freq))
+            df = s.resample(new_freq, label='left', closed='left', origin='start',
+                            on='date_time').agg(how).reset_index()
+            df = df.drop('interval', 1) # remove interval so it can be inserted again
+            df = df.rename_axis('interval').reset_index()
+            df.insert(0, "subject", k)
+            aggregated_data[k] = df
+        return Datafile(pd.concat(aggregated_data.values(), axis=0))
