@@ -238,3 +238,28 @@ class Datafile:
             df.insert(0, "subject", k)
             aggregated_data[k] = df
         return Datafile(pd.concat(aggregated_data.values(), axis=0))
+
+    def reorient_data(self, orientation):
+        if orientation == 'subject-wide':
+            self.logger.info("Reorienting to subject-wide format")
+            # might not meet the Datafile long format specifications
+            df = self.data.melt(id_vars=["subject", "date_time", "interval", "light"],
+                                var_name="parameter")
+            df = df.pivot_table(index=["parameter", "date_time", "interval", "light"],
+                                columns="subject").reset_index()
+            return df
+        else:
+            return self.data
+
+    def set_datetime_start(self, start_date, start_time):
+        modified_data = {}
+        for k, s in self.subject_split_data.items():
+            new_dt = create_datetime_series(start_date, start_time, s.shape[0], self.freq)
+            with pd.option_context('mode.chained_assignment', None):
+                s.date_time = new_dt
+            modified_data[k] = s
+        return Datafile(pd.concat(modified_data.values(), axis=0))
+
+    def export(self, file):
+        self.logger.info("Exporting to file: {}".format(file))
+        self.data.to_csv(file, mode="a", index=False, header=True)
