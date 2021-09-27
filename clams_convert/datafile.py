@@ -8,6 +8,27 @@ from datetime import timedelta, datetime, time, date
 from .custom_parser import AnalysisVisParser
 from . import errors as e
 
+def round_minutes(dt, how="up"):
+    if how == "up":
+        return dt + timedelta(seconds=(60-dt.second))
+    elif how == "down":
+        return dt + timedelta(seconds=dt.second)
+    else:
+        return None
+
+def str_to_time(time_string, sep=":"):
+    if len(sep) != 1:
+        raise ValueError("Time separator is not of length 1")
+    t = time(*map(int, time_string.split(sep)))
+    return t
+
+def freq_to_seconds(freq):
+    return int(freq.total_seconds())
+
+def create_parameter_ts(df, parameter):
+    # TODO casting all to float might not work
+    ts = traces.TimeSeries(dict(zip(df.date_time, df[parameter].astype(float))))
+    return ts
 
 class Datafile:
 
