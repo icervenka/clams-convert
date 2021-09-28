@@ -30,6 +30,21 @@ def create_parameter_ts(df, parameter):
     ts = traces.TimeSeries(dict(zip(df.date_time, df[parameter].astype(float))))
     return ts
 
+def traces_to_pandas(ts_dict):
+    per_subject = []
+    for s, subjects in ts_dict.items():
+        per_param = []
+        for p, parameter in subjects.items():
+            param_df = pd.DataFrame(parameter).set_index(0)
+            param_df.index.name = "date_time"
+            param_df.columns = [p]
+            per_param.append(param_df)
+        subject_df = pd.concat(per_param, axis=1).reset_index()
+        subject_df.insert(1, "interval", list(range(len(subject_df.index))))
+        subject_df.insert(0, "subject", s)
+        per_subject.append(subject_df)
+    return pd.concat(per_subject, axis=0)
+
 class Datafile:
 
     def __init__(self, datafile, dark_start = None, dark_end = None, force_regularize=True):
