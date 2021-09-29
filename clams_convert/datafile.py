@@ -45,6 +45,26 @@ def traces_to_pandas(ts_dict):
         per_subject.append(subject_df)
     return pd.concat(per_subject, axis=0)
 
+def create_datetime_series(self, start_date, start_time, periods, freq):
+    start = datetime.strptime(start_date + " " + start_time, "%Y-%m-%d %H:%M:%S")
+    dt = pd.date_range(start=start, periods=periods, freq=str(freq)+'s')
+    return dt
+
+
+def find_common_divisors(a, b):
+    a = int(a)
+    b = int(b)
+    divisors = []
+    for i in range(1, min(a, b)+1):
+        if a%i == 0 and b%i == 0:
+            divisors.append(i)
+    return divisors
+
+def divisible(arr, a):
+    a = int(a)
+    return [int(x) for x in arr if int(x)%a == 0]
+
+
 class Datafile:
 
     def __init__(self, datafile, dark_start = None, dark_end = None, force_regularize=True):
