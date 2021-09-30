@@ -65,6 +65,8 @@ def divisible(arr, a):
     return [int(x) for x in arr if int(x)%a == 0]
 
 
+#TODO light as parameter or descriptor?
+# problems with interpolation during traces
 class Datafile:
 
     def __init__(self, datafile, dark_start = None, dark_end = None, force_regularize=True):
@@ -238,6 +240,23 @@ class Datafile:
                     "them with common measurement frequency.")
         except ValueError:
             ("No measurement intervals detected in data file.")
+
+    def __initialize(self, rename_subject_mapping=None, round_mins=True, **kwargs):
+        try: # if self.data is not None:
+            self.init_subjects(rename_subject_mapping)
+            self.init_num_observations()
+            self.init_parameters()
+            self.init_start_end_date(round_mins)
+            if self.data['light'] is None:
+                self.init_light_column()
+            self.init_phase_changes()
+            self.init_freq()
+            self.init_allowed_agg_freq()
+        # TODO I dont know if this will work
+        except ValueError:
+            print("Experiment doesn't contain any data to initialize from.")
+        self.initialized = True
+        return self
 
     # Block of regularize and regularize-related functions
     #
