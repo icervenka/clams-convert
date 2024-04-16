@@ -1,5 +1,5 @@
 from .file_parser import FileParser
-from .file_parser import check_subject_names, convert_values
+from .file_parser import rename_subjects, convert_values
 from . import errors as e
 import pandas as pd
 import numpy as np
@@ -246,7 +246,7 @@ class FwrZierathParser(FileParser):
         return subjects
 
     def prettify(self, data, subjects, *args):
-        subjects = check_subject_names(subjects)
+        subjects = rename_subjects(subjects)
         date_time = data.iloc[:, 0]
         date_time = self.format_ts(date_time)
 

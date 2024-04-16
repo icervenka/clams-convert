@@ -4,7 +4,14 @@ import numpy as np
 from abc import abstractmethod
 from . import errors as e
 
-def check_subject_names(names):
+# def regular_freq(delta):
+#     if delta.days > 0:
+#         raise UserWarning("Interval seems to be too long, is there a parsing error?")
+#     interval = delta.total_seconds()
+#     return str(interval) + 'S'
+
+
+def rename_subjects(names):
     import string
     letters = iter(string.ascii_letters)
     seen = set()
@@ -17,6 +24,9 @@ def check_subject_names(names):
         seen.add(n)
         renamed.append(n)
     return renamed
+
+def rename_headers(names):
+    pass
 
 def convert_values(df, conversion_factor, columns="all"):
     if isinstance(df, pd.Series):
@@ -109,11 +119,13 @@ class FileParser:
         if len(set(header)) != len(header):
             if self.repair_header == True:
                 # adds unique prefixes to header in case the column names are the same
+                # TODO better header repair function
                 return ["X" + str(x) for x in range(len(header))]
             else:
                 raise e.HeaderNotUniqueError("Column names in data file are not unique.")
         else:
             return header
+    
     def read_data(self, text):
         header = text[self.line_numbers['data_start'] + self.offsets['header_start']]
         header = header.split(self.split_char)
