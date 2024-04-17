@@ -131,8 +131,8 @@ def main():
     #validate_args(args)
 
     act = args.action(args)
-    act.export(act.run())
-
+    result = act.run()
+    act.export(result)
 
 if __name__ == "__main__":
     main()

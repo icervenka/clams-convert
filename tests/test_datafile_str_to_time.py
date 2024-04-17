@@ -1,6 +1,5 @@
 import pytest
 from clams_convert.datafile import str_to_time
-from clams_convert.datafile import str_to_time
 from datetime import timedelta, datetime, time
 
 def test_str_to_time():
