@@ -12,7 +12,7 @@ def round_minutes(dt, how="up"):
     if how == "up":
         return dt + timedelta(seconds=(60-dt.second))
     elif how == "down":
-        return dt + timedelta(seconds=dt.second)
+        return dt - timedelta(seconds=dt.second)
     else:
         return None
 
