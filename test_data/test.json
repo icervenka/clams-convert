@@ -1,0 +1,17 @@
+{
+  "test_suites": [
+    "zierathold_1": {
+      "action": "Convert",
+      "parser": "fwr-zierathold",
+      "args": {
+        "input": ["zierathold_1/week1.asc", "zierathold_1/week2.asc", "zierathold_1/week3.asc"]
+        "output": "zierathold_1",
+        "dark_start": "18:00:00",
+        "dark_end": "06:00:00",
+        "match_start": "1970-01-01",
+        "system": "fwr-zierath",
+        "time_fmt_in": "%d/%m/%Y %H:%M:%S"
+      }
+    }
+  ]
+}
